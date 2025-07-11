@@ -1,9 +1,11 @@
 package com.project.Security.Service;
 
 import com.project.Security.DTO.UserDetailDTO;
+import com.project.Security.Entity.FunctionEntity;
 import com.project.Security.Entity.Permission;
 import com.project.Security.Entity.RoleEntity;
 import com.project.Security.Entity.UserEntity;
+import com.project.Security.Repository.FunctionRepository;
 import com.project.Security.Repository.RoleRepository;
 import com.project.Security.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class UserService {
 
 	@Autowired
 	private RoleRepository roleRepository;
+	
+	@Autowired
+	private FunctionRepository functionRepository;
 
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
@@ -179,39 +184,48 @@ public class UserService {
 		return userRepository.findAllUsers().stream().map(user -> new UserDetailDTO(user.getID(), user.getUSER_NAME(),
 				user.getPASSWORD(), user.getENABLED() ? 1 : 0)).collect(Collectors.toList());
 	}
-
-//	// Lấy danh sách quyền theo vai trò
-//	public List<Permission> getPermissionsForRole(int id) {
-//		return roleRepository.findPermissionsByRoleId(id);
-//	}
-
-//    // sưa đổi quyền của vai trò
-//    @Transactional
-//    public void updateRolePermissions(Integer roleId, List<String> permissions) {
-//    	if (!roleRepository.existsById(roleId)) {
-//    		throw new IllegalArgumentException("Role not found with ID: " + roleId);
-//    	}
-//
-//    	// Xoá quyền cũ
-//    	roleRepository.deletePermissionsByRoleId(roleId);
-//
-//    	// Thêm quyền mới (nếu có)
-//    	if (permissions != null && !permissions.isEmpty()) {
-//    		roleRepository.insertPermissions(roleId, permissions);
-//    	}
-//    }
-
+	
 	// Tìm người dùng theo vai trò
 	public List<String> findUsersByRoleId(Integer roleId) {
 		return roleRepository.findUsersByRoleId(roleId);
 	}
 
+	//tìm vai trò theo người dùng
+	public List<String> findRolesByUserId(Integer userId) {
+		return userRepository.findRolesByUserId(userId);
+	}
+	
+	//Lấy tất cả vai trò 
+	public List<RoleEntity> getAllRoleEntities() {
+		return roleRepository.findAll();
+	}
+	
+	//Lấy tất cả chức năng theo vai trò
+	public List<FunctionEntity> getFunctionByRoleId(Integer roleId) {
+		return functionRepository.findByRolesId(roleId);
+	}
+	
+	// Sửa chức năng của vai trò
+	@Transactional
+	public void editFunctionsByRoleId(Integer roleId, List<String> functionNames) {
+	    roleRepository.deleteFunctionsByRoleId(roleId);
+	    if (functionNames != null && !functionNames.isEmpty()) {
+	        roleRepository.insertFunctions(roleId, functionNames);
+	    }
+	}
+	
+	// Lấy tất cả chức năng
+	public List<FunctionEntity> getAllFunctions() {
+		return functionRepository.findAll();
+	}
+	
 	// Lấy tất cả quyền
 	public List<Permission> getAllPermissions() {
 		return roleRepository.findAllPermissions();
 	}
+	// lấy tất cả quyền thep chức năng 
+	public List<Permission> getPermissionsByFunctionId(Integer functionId) {
+		return functionRepository.findPermissionsByFunctionId(functionId);
+	}
 	
-	
-	
-
 }

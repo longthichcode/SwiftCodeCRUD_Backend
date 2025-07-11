@@ -61,7 +61,15 @@ public class AuthController {
                 .map(authentication -> authentication.getAuthority())
                 .filter(authority -> authority.startsWith("ROLE_"))
                 .collect(Collectors.toList());
-            return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, roles, userDetails.getUsername()));
+            List<String> permissions = userDetails.getAuthorities().stream()
+				.map(authentication -> authentication.getAuthority())
+				.filter(authority -> !authority.startsWith("ROLE_"))
+				.collect(Collectors.toList());
+            List<String> functions = user.getROLES().stream()
+				.flatMap(role -> role.getFunctions().stream())
+				.map(function -> function.getName()).distinct()
+				.collect(Collectors.toList());
+            return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, roles, functions, permissions, userDetails.getUsername()));
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }

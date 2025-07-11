@@ -69,7 +69,7 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Integer> {
     // Lấy tất cả vai trò
     @Query(value = "SELECT * FROM SC_ROLES", nativeQuery = true)
     List<RoleEntity> findAll();
-
+    
     // Lấy danh sách quyền theo vai trò (thông qua Function)
     @Query(value = "SELECT p.* FROM SC_PERMISSIONS p " +
                    "JOIN SC_FUNCTION_PERMISSION fp ON p.ID = fp.PERMISSION_ID " +

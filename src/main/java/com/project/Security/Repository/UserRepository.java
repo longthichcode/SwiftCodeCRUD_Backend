@@ -34,4 +34,10 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     // Lấy tất cả người dùng
     @Query(value = "SELECT * FROM SC_USERS", nativeQuery = true)
     List<UserEntity> findAllUsers();
+    
+    //tìm vai trò của người dùnng
+    @Query(value = "SELECT r.ROLE_NAME FROM SC_USER_ROLE ur " +
+				   "JOIN SC_ROLES r ON ur.ROLE_ID = r.ID " +
+				   "WHERE ur.USER_ID = :userId", nativeQuery = true)
+    List<String> findRolesByUserId(@Param("userId") Integer userId);
 }

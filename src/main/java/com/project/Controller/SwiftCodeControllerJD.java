@@ -25,7 +25,6 @@ public class SwiftCodeControllerJD {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Page<SwiftCodeDTO>> findBySpecification(@RequestParam(defaultValue = "0") int page_number, @RequestParam(defaultValue = "30") int page_size) {
         Pageable pr = PageRequest.of(page_number, page_size);
         SwiftCodeEntity sce = new SwiftCodeEntity();
@@ -34,7 +33,6 @@ public class SwiftCodeControllerJD {
     }
 
     @PostMapping("/search")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<SwiftCodeDTO>> findBySpecification(@RequestBody SwiftCodeSearchDTO searchDTO) {
         SwiftCodeEntity sce = new SwiftCodeEntity();
         sce.setBANK_TYPE(searchDTO.getBANK_TYPE());
@@ -49,7 +47,6 @@ public class SwiftCodeControllerJD {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SwiftCodeDTO> findById(@PathVariable int id) {
         SwiftCodeDTO scd = this.service.findByID(id);
         if (scd != null) {
@@ -60,7 +57,6 @@ public class SwiftCodeControllerJD {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SwiftCodeDTO> add(@RequestBody SwiftCodeDTO scd) {
         if (scd == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -71,7 +67,6 @@ public class SwiftCodeControllerJD {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SwiftCodeDTO> update(@PathVariable int id, @RequestBody SwiftCodeDTO scd) {
         if (scd == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -82,7 +77,6 @@ public class SwiftCodeControllerJD {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable int id) {
         SwiftCodeEntity sce = new SwiftCodeEntity();
         sce.setID(id);

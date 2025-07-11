@@ -22,26 +22,60 @@ public class Permission {
     @Column(name = "DESCRIPTION", length = 255)
     private String description;
 
-    @Column(name = "URL", unique = true, nullable = false, length = 255)
+    @Column(name = "URL", unique = false, nullable = false, length = 255)
     private String url;
 
+    @Column(name = "METHOD", nullable = true, length = 10)
+    private String method;
+    
     // Constructors
     public Permission() {}
+    
+    public Permission(String name, String description, String url, String method) {
+		this.name = name;
+		this.description = description;
+		this.url = url;
+		this.method = method;
+	}
 
-    public Permission(Long id, String name, String description, String url) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.url = url;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public String getUrl() { return url; }
-    public void setUrl(String url) { this.url = url; }
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getMethod() {
+		return method;
+	}
+
+	public void setMethod(String method) {
+		this.method = method;
+	}
+    
 }
