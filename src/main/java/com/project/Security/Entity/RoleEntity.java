@@ -25,6 +25,14 @@ public class RoleEntity {
     )
     private Set<FunctionEntity> functions = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "SC_ROLE_PERMISSION",
+        joinColumns = @JoinColumn(name = "ROLE_ID"),
+        inverseJoinColumns = @JoinColumn(name = "PERMISSION_ID")
+    )
+    private Set<Permission> permissions = new HashSet<>();
+
     @ManyToMany(mappedBy = "ROLES")
     private Set<UserEntity> USERS = new HashSet<>();
 
@@ -43,6 +51,8 @@ public class RoleEntity {
     public void setROLE_NAME(String ROLE_NAME) { this.ROLE_NAME = ROLE_NAME; }
     public Set<FunctionEntity> getFunctions() { return functions; }
     public void setFunctions(Set<FunctionEntity> functions) { this.functions = functions; }
+    public Set<Permission> getPermissions() { return permissions; }
+    public void setPermissions(Set<Permission> permissions) { this.permissions = permissions; }
     public Set<UserEntity> getUSERS() { return USERS; }
     public void setUSERS(Set<UserEntity> USERS) { this.USERS = USERS; }
 }

@@ -45,11 +45,8 @@ public class SwiftCodeProcedureCaller {
             stmt.setString(3, sce.getBRANCH());
             stmt.setString(4, sce.getCITY());
             stmt.setString(5, sce.getCOUNTRY_CODE());
-            stmt.setInt(6, pageNumber);
-            stmt.setInt(7, pageSize);
-
+            
             // Đăng ký tham số đầu ra
-            stmt.registerOutParameter(8, OracleTypes.INTEGER); // Tổng số bản ghi
             stmt.registerOutParameter(9, OracleTypes.CURSOR); // Cursor kết quả
 
             // Thực thi stored procedure
@@ -57,6 +54,7 @@ public class SwiftCodeProcedureCaller {
 
             // Lấy cursor và chuyển đổi thành danh sách SwiftCodeDTO
             rs = (ResultSet) stmt.getObject(9);
+            
             while (rs.next()) {
                 SwiftCodeDTO dto = new SwiftCodeDTO(
                     rs.getInt("ID"),

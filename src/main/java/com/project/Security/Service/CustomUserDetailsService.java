@@ -23,7 +23,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy thông tin người dùng: " + username));
-
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
         // Thêm roles và permissions từ functions
         user.getROLES().forEach(role -> {

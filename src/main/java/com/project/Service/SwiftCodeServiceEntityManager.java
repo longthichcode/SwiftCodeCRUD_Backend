@@ -14,7 +14,9 @@ import com.project.DTO.SwiftCodeDTO;
 import com.project.Entity.SwiftCodeEntity;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.StoredProcedureQuery;
 import jakarta.transaction.Transactional;
 
 @Service("EMService")
@@ -44,15 +46,34 @@ public class SwiftCodeServiceEntityManager implements SwiftCodeService {
 	}
 
 	@Override
-	public List<SwiftCodeDTO> findBySpe(SwiftCodeEntity sce) {
-		// TODO Auto-generated method stub
-		List<SwiftCodeEntity> listSce = this.swiftCodeDAO.findBySpecification(sce);
-		List<SwiftCodeDTO> listScd = new ArrayList<SwiftCodeDTO>();
-		for (SwiftCodeEntity swiftCodeEntity : listSce) {
-			listScd.add(maptoDTO(swiftCodeEntity));
-		}
-		return listScd;
-	}
+    public List<SwiftCodeDTO> findBySpe(SwiftCodeEntity sce) {
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_search_swift_code", SwiftCodeEntity.class);
+
+        query.registerStoredProcedureParameter("p_bank_type", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_bank_name", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_branch", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_city", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_country_code", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_result", void.class, ParameterMode.REF_CURSOR);
+
+        query.setParameter("p_bank_type", sce.getBANK_TYPE());
+        query.setParameter("p_bank_name", sce.getBANK_NAME());
+        query.setParameter("p_branch", sce.getBRANCH());
+        query.setParameter("p_city", sce.getCITY());
+        query.setParameter("p_country_code", sce.getCOUNTRY_CODE());
+
+        List<SwiftCodeEntity> listSce = query.getResultList();
+
+        // Chuyển đổi sang SwiftCodeDTO
+        List<SwiftCodeDTO> listScd = new ArrayList<>();
+        System.out.println("List size: " + listSce.size());
+        for (SwiftCodeEntity swiftCodeEntity : listSce) {
+            SwiftCodeDTO scd = maptoDTO(swiftCodeEntity);
+            listScd.add(scd);
+        }
+
+        return listScd;
+    }
 
 	@Override
 	@Transactional
