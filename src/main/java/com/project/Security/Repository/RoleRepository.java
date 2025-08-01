@@ -70,5 +70,15 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Integer> {
 				   "JOIN SC_ROLE_PERMISSION rp ON p.ID = rp.PERMISSION_ID " +
 				   "WHERE rp.ROLE_ID = :roleId", nativeQuery = true)
     List<Permission> findPermissionsByRoleIdWithoutFunction(@Param("roleId") Integer roleId);
-
+    
+    // xoá quyền của vai trò 
+    @Modifying
+    @Query(value = "DELETE FROM SC_ROLE_PERMISSION WHERE ROLE_ID = :roleId", nativeQuery = true)
+    void deletePermissionsByRoleId(@Param("roleId") Integer roleId);
+    // Thêm quyền cho vai trò
+    @Modifying
+    @Query(value = "INSERT INTO SC_ROLE_PERMISSION (ROLE_ID, PERMISSION_ID) " +
+				   "SELECT :roleId, p.ID FROM SC_PERMISSIONS p WHERE p.NAME IN :permissions", nativeQuery = true)
+    void insertPermissions(@Param("roleId") Integer roleId, @Param("permissions") List<String> permissions);
+    
 }

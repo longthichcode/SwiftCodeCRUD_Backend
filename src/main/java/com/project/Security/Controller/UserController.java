@@ -123,42 +123,142 @@ public class UserController {
 
 		for (UserDetailDTO user : users) {
 			List<String> roleNames = userService.findRolesByUserId(user.getId());
-			
+
 			UserResponse userResponse = new UserResponse();
 			userResponse.setId(user.getId());
 			userResponse.setUsername(user.getUsername());
 			userResponse.setPassword(user.getPassword());
 			userResponse.setEnabled(user.getEnabled());
 			userResponse.setRoles(roleNames);
-			
+
 			userResponses.add(userResponse);
 		}
 
 		return ResponseEntity.ok(userResponses);
 	}
-	
+
 	// ===== ROLE MANAGEMENT =====
-
-	// Lấy tất cả vai trò và chức năng tương ứng
+	// Lấy tất cả vai trò
 	@GetMapping("/roles")
-	public ResponseEntity<List<RoleResponse>> getAllRolesAndFunctions() {
-		List<RoleEntity> roles = userService.getAllRoleEntities();
-		List<RoleResponse> roleResponses = new ArrayList<>();
+	public ResponseEntity<?> getRolesAndFunctions(@RequestParam(required = false) Integer roleId) {
+	    try {
+	        List<Map<String, Object>> roleResponses;
 
-		for (RoleEntity role : roles) {
-			List<String> userNames = userService.findUsersByRoleId(role.getID());
-			List<FunctionEntity> functions = userService.getFunctionByRoleId(role.getID());
+	        // Nếu roleId được cung cấp, lấy thông tin cho vai trò cụ thể
+	        if (roleId != null) {
+	            // Kiểm tra vai trò tồn tại
+	            RoleEntity role = userService.getAllRoleEntities().stream()
+	                    .filter(r -> r.getID().equals(roleId))
+	                    .findFirst()
+	                    .orElseThrow(() -> new IllegalArgumentException("Role not found with ID: " + roleId));
 
-			List<String> functionsNames = functions.stream().map(FunctionEntity::getName).collect(Collectors.toList());
-			List<String> functionsDes = functions.stream().map(FunctionEntity::getDescription)
-					.collect(Collectors.toList());
+	            Map<String, Object> roleMap = new HashMap<>();
+	            roleMap.put("id", role.getID());
+	            roleMap.put("name", role.getROLE_NAME());
 
-			RoleResponse response = new RoleResponse(role.getID(), role.getROLE_NAME(), userNames, functionsNames,
-					functionsDes);
-			roleResponses.add(response);
+	            // Lấy danh sách function của vai trò
+	            List<Map<String, Object>> functionList = new ArrayList<>();
+	            List<FunctionEntity> functions = userService.getFunctionByRoleId(roleId);
+
+	            for (FunctionEntity function : functions) {
+	                Map<String, Object> functionMap = new HashMap<>();
+	                functionMap.put("id", function.getId());
+	                functionMap.put("name", function.getName());
+	                functionMap.put("description", function.getDescription());
+
+	                // Lấy danh sách permission trực tiếp của role từ SC_ROLE_PERMISSION
+	                List<Permission> permissions = userService.getPermissionsByRoleId(roleId); // Sửa lại để dùng đúng phương thức
+	                List<Map<String, Object>> permissionList = new ArrayList<>();
+
+	                for (Permission permission : permissions) {
+	                    Map<String, Object> permissionMap = new HashMap<>();
+	                    permissionMap.put("id", permission.getId());
+	                    permissionMap.put("name", permission.getName());
+	                    permissionMap.put("description", permission.getDescription());
+	                    permissionMap.put("url", permission.getUrl());
+	                    permissionMap.put("method", permission.getMethod());
+	                    permissionList.add(permissionMap);
+	                }
+
+	                functionMap.put("permissions", permissionList);
+	                functionList.add(functionMap);
+	            }
+
+	            roleMap.put("functions", functionList);
+	            roleResponses = Collections.singletonList(roleMap);
+	        } else {
+	            // Nếu không có roleId, lấy tất cả vai trò
+	            List<RoleEntity> roles = userService.getAllRoleEntities();
+	            roleResponses = new ArrayList<>();
+
+	            for (RoleEntity role : roles) {
+	                Map<String, Object> roleMap = new HashMap<>();
+	                roleMap.put("id", role.getID());
+	                roleMap.put("name", role.getROLE_NAME());
+
+	                // Lấy danh sách userNames
+	                List<String> userNames = userService.findUsersByRoleId(role.getID());
+
+	                // Lấy danh sách function của vai trò
+	                List<Map<String, Object>> functionList = new ArrayList<>();
+	                List<FunctionEntity> functions = userService.getFunctionByRoleId(role.getID());
+
+	                for (FunctionEntity function : functions) {
+	                    Map<String, Object> functionMap = new HashMap<>();
+	                    functionMap.put("id", function.getId());
+	                    functionMap.put("name", function.getName());
+	                    functionMap.put("description", function.getDescription());
+
+	                    // Lấy danh sách permission trực tiếp của role từ SC_ROLE_PERMISSION
+	                    List<Permission> permissions = userService.getPermissionsByRoleId(role.getID()); // Sửa lại để dùng đúng phương thức
+	                    List<Map<String, Object>> permissionList = new ArrayList<>();
+
+	                    for (Permission permission : permissions) {
+	                        Map<String, Object> permissionMap = new HashMap<>();
+	                        permissionMap.put("id", permission.getId());
+	                        permissionMap.put("name", permission.getName());
+	                        permissionMap.put("description", permission.getDescription());
+	                        permissionMap.put("url", permission.getUrl());
+	                        permissionMap.put("method", permission.getMethod());
+	                        permissionList.add(permissionMap);
+	                    }
+
+	                    functionMap.put("permissions", permissionList);
+	                    functionList.add(functionMap);
+	                }
+
+	                roleMap.put("functions", functionList);
+	                roleMap.put("users", userNames); // Thêm danh sách userNames
+	                roleResponses.add(roleMap);
+	            }
+	        }
+
+	        return ResponseEntity.ok(roleResponses);
+	    } catch (IllegalArgumentException e) {
+	        Map<String, Object> errorResponse = new HashMap<>();
+	        errorResponse.put("error", e.getMessage());
+	        return ResponseEntity.status(404).body(errorResponse);
+	    } catch (Exception e) {
+	        Map<String, Object> errorResponse = new HashMap<>();
+	        errorResponse.put("error", "Lỗi khi lấy thông tin vai trò: " + e.getMessage());
+	        return ResponseEntity.status(500).body(errorResponse);
+	    }
+	}
+
+	// sửa quyền của vai trò
+	@PutMapping("/roles/{roleId}/permissions")
+	public ResponseEntity<?> editPermissionsByRoleId(@PathVariable Integer roleId,
+			@RequestBody List<String> permissionNames) {
+		try {
+			userService.editPermissionsByRoleId(roleId, permissionNames);
+			Map<String, String> response = new HashMap<>();
+			response.put("message", "Permissions updated successfully for role ID: " + roleId);
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			Map<String, String> errorResponse = new HashMap<>();
+			errorResponse.put("error", "Error updating permissions: " + e.getMessage());
+			return ResponseEntity.status(400).body(errorResponse);
 		}
-
-		return ResponseEntity.ok(roleResponses);
 	}
 
 	// Lấy tất cả chức năng theo vai trò

@@ -228,4 +228,17 @@ public class UserService {
 		return functionRepository.findPermissionsByFunctionId(functionId);
 	}
 	
+	// Lất tất cả quyền theo vai trò không thông qua Function
+	public List<Permission> getPermissionsByRoleId(Integer roleId) {
+		return roleRepository.findPermissionsByRoleIdWithoutFunction(roleId);
+	}
+	
+	//sửa quyền của vai trò
+	@Transactional
+	public void editPermissionsByRoleId(Integer roleId, List<String> permissionNames) {
+		roleRepository.deletePermissionsByRoleId(roleId);
+		if (permissionNames != null && !permissionNames.isEmpty()) {
+			roleRepository.insertPermissions(roleId, permissionNames);
+		}
+	}
 }
