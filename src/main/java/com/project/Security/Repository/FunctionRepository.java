@@ -18,6 +18,9 @@ public interface FunctionRepository extends JpaRepository<FunctionEntity, Intege
 	// Lấy tất cả chức năng
 	List<FunctionEntity> findAll();
 	
+	@Query("SELECT f FROM FunctionEntity f LEFT JOIN FETCH f.permissions")
+    List<FunctionEntity> findAllWithPermissions();
+	
 	//Lấy tất cả chức năng theo vai trò
 	@Query(value = "SELECT f.* FROM SC_FUNCTIONS f " +
 			"JOIN SC_ROLE_FUNCTION rf ON f.ID = rf.FUNCTION_ID " +

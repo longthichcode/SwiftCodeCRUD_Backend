@@ -1,5 +1,7 @@
 package com.project.Security.Service;
 
+import com.project.Security.DTO.FunctionResponse;
+import com.project.Security.DTO.PermissionDTO;
 import com.project.Security.DTO.UserDetailDTO;
 import com.project.Security.Entity.FunctionEntity;
 import com.project.Security.Entity.Permission;
@@ -214,10 +216,25 @@ public class UserService {
 	    }
 	}
 	
-	// Lấy tất cả chức năng
-	public List<FunctionEntity> getAllFunctions() {
-		return functionRepository.findAll();
-	}
+	public List<FunctionResponse> getAllFunctions() {
+        List<FunctionEntity> functions = functionRepository.findAllWithPermissions();
+        return functions.stream()
+            .map(f -> new FunctionResponse(
+                f.getId(),
+                f.getName(),
+                f.getDescription(),
+                f.getPermissions().stream()
+                    .map(p -> new PermissionDTO(
+                        p.getId(),
+                        p.getName(),
+                        p.getDescription(),
+                        p.getUrl(),
+                        p.getMethod()
+                    ))
+                    .collect(Collectors.toList())
+            ))
+            .collect(Collectors.toList());
+    }
 	
 	// Lấy tất cả quyền
 	public List<Permission> getAllPermissions() {

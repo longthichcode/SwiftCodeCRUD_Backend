@@ -293,26 +293,10 @@ public class UserController {
 
 	// Lấy tất cả chức năng
 	@GetMapping("/functions")
-	public ResponseEntity<List<FunctionResponse>> getAllFunctions() {
-		List<FunctionEntity> functions = userService.getAllFunctions();
-		List<FunctionResponse> functionResponses = new ArrayList<>();
-
-		for (FunctionEntity function : functions) {
-			List<String> permissionsNames = userService.getPermissionsByFunctionId(function.getId()).stream()
-					.map(Permission::getName).collect(Collectors.toList());
-			List<String> permissionsDes = userService.getPermissionsByFunctionId(function.getId()).stream()
-					.map(Permission::getDescription).collect(Collectors.toList());
-			List<String> methods = userService.getPermissionsByFunctionId(function.getId()).stream()
-					.map(Permission::getMethod).collect(Collectors.toList());
-			List<String> urls = userService.getPermissionsByFunctionId(function.getId()).stream()
-					.map(Permission::getUrl).collect(Collectors.toList());
-
-			FunctionResponse response = new FunctionResponse(function.getId(), function.getName(),
-					function.getDescription(), permissionsNames, permissionsDes, methods, urls);
-			functionResponses.add(response);
-		}
-		return ResponseEntity.ok(functionResponses);
-	}
+    public ResponseEntity<List<FunctionResponse>> getAllFunctions() {
+        List<FunctionResponse> functionResponses = userService.getAllFunctions();
+        return ResponseEntity.ok(functionResponses);
+    }
 
 	// Lấy quyền theo chức năng
 	@GetMapping("/functions/{functionId}/permissions")
