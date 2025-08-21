@@ -81,4 +81,5 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Integer> {
 				   "SELECT :roleId, p.ID FROM SC_PERMISSIONS p WHERE p.NAME IN :permissions", nativeQuery = true)
     void insertPermissions(@Param("roleId") Integer roleId, @Param("permissions") List<String> permissions);
     
+    
 }

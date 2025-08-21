@@ -1,7 +1,14 @@
 package com.project.Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -10,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.project.DTO.ExcelError;
 import com.project.DTO.SwiftCodeDTO;
 import com.project.Entity.SwiftCodeEntity;
 import com.project.Repository.SwiftCodeRepository;
@@ -22,15 +30,22 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.transaction.annotation.Transactional;
+
 @Service("JDService")
 public class SwiftCodeIServiceJPADynamic implements SwiftCodeService {
 
 	public final SwiftCodeRepository repository;
 	public final EntityManager entityManager;
 
-	public SwiftCodeIServiceJPADynamic(SwiftCodeRepository repository,EntityManager entityManager) {
+	public SwiftCodeIServiceJPADynamic(SwiftCodeRepository repository, EntityManager entityManager) {
 		this.repository = repository;
-		this.entityManager = entityManager ;
+		this.entityManager = entityManager;
 	}
 
 	@Override
@@ -45,33 +60,34 @@ public class SwiftCodeIServiceJPADynamic implements SwiftCodeService {
 	}
 
 	@Override
-    public List<SwiftCodeDTO> findBySpe(SwiftCodeEntity sce) {
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_search_swift_code", SwiftCodeEntity.class);
+	public List<SwiftCodeDTO> findBySpe(SwiftCodeEntity sce) {
+		StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_search_swift_code",
+				SwiftCodeEntity.class);
 
-        query.registerStoredProcedureParameter("p_bank_type", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_bank_name", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_branch", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_city", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_country_code", String.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_result", void.class, ParameterMode.REF_CURSOR);
+		query.registerStoredProcedureParameter("p_bank_type", String.class, ParameterMode.IN);
+		query.registerStoredProcedureParameter("p_bank_name", String.class, ParameterMode.IN);
+		query.registerStoredProcedureParameter("p_branch", String.class, ParameterMode.IN);
+		query.registerStoredProcedureParameter("p_city", String.class, ParameterMode.IN);
+		query.registerStoredProcedureParameter("p_country_code", String.class, ParameterMode.IN);
+		query.registerStoredProcedureParameter("p_result", void.class, ParameterMode.REF_CURSOR);
 
-        query.setParameter("p_bank_type", sce.getBANK_TYPE());
-        query.setParameter("p_bank_name", sce.getBANK_NAME());
-        query.setParameter("p_branch", sce.getBRANCH());
-        query.setParameter("p_city", sce.getCITY());
-        query.setParameter("p_country_code", sce.getCOUNTRY_CODE());
+		query.setParameter("p_bank_type", sce.getBANK_TYPE());
+		query.setParameter("p_bank_name", sce.getBANK_NAME());
+		query.setParameter("p_branch", sce.getBRANCH());
+		query.setParameter("p_city", sce.getCITY());
+		query.setParameter("p_country_code", sce.getCOUNTRY_CODE());
 
-        List<SwiftCodeEntity> listSce = query.getResultList();
+		List<SwiftCodeEntity> listSce = query.getResultList();
 
-        // Chuyển đổi sang SwiftCodeDTO
-        List<SwiftCodeDTO> listScd = new ArrayList<>();
-        for (SwiftCodeEntity swiftCodeEntity : listSce) {
-            SwiftCodeDTO scd = maptoDTO(swiftCodeEntity);
-            listScd.add(scd);
-        }
+		// Chuyển đổi sang SwiftCodeDTO
+		List<SwiftCodeDTO> listScd = new ArrayList<>();
+		for (SwiftCodeEntity swiftCodeEntity : listSce) {
+			SwiftCodeDTO scd = maptoDTO(swiftCodeEntity);
+			listScd.add(scd);
+		}
 
-        return listScd;
-    }
+		return listScd;
+	}
 //	@Override
 //	public List<SwiftCodeDTO> findBySpe(SwiftCodeEntity sce) {
 //		// TODO Auto-generated method stub
@@ -120,7 +136,7 @@ public class SwiftCodeIServiceJPADynamic implements SwiftCodeService {
 			throw new RuntimeException("SwiftCodeDTO không được null");
 		}
 		SwiftCodeDTO scodeDTO = this.findByID(scd.getID());
-		if(scodeDTO!=null) {
+		if (scodeDTO != null) {
 			SwiftCodeDTO newScd = new SwiftCodeDTO();
 			newScd.setACTIVE_STATUS(scd.getACTIVE_STATUS());
 			newScd.setADDRESS_1(scd.getADDRESS_1());
@@ -139,7 +155,7 @@ public class SwiftCodeIServiceJPADynamic implements SwiftCodeService {
 			newScd.setSWIFT_CONNECTION(scd.getSWIFT_CONNECTION());
 			SwiftCodeEntity swiftCode = maptoEntity(newScd);
 			this.repository.save(swiftCode);
-			return newScd ;
+			return newScd;
 		}
 		SwiftCodeEntity swiftCode = maptoEntity(scd);
 		this.repository.save(swiftCode);
@@ -206,16 +222,188 @@ public class SwiftCodeIServiceJPADynamic implements SwiftCodeService {
 
 	public static SwiftCodeDTO maptoDTO(SwiftCodeEntity sce) {
 		return new SwiftCodeDTO(sce.getID(), sce.getBANK_TYPE(), sce.getSWIFT_CODE(), sce.getCONNECTED_TO_SWIFT(),
-				sce.getSWIFT_CONNECTION(), sce.getBANK_NAME(), sce.getBRANCH(), sce.getADDRESS_1(),
-				sce.getADDRESS_2(), sce.getADDRESS_3(), sce.getADDRESS_4(), sce.getCITY(), sce.getCOUNTRY_CODE(),
-				sce.getPARA_STATUS(), sce.getACTIVE_STATUS(), sce.getJSON_DATA());
+				sce.getSWIFT_CONNECTION(), sce.getBANK_NAME(), sce.getBRANCH(), sce.getADDRESS_1(), sce.getADDRESS_2(),
+				sce.getADDRESS_3(), sce.getADDRESS_4(), sce.getCITY(), sce.getCOUNTRY_CODE(), sce.getPARA_STATUS(),
+				sce.getACTIVE_STATUS(), sce.getJSON_DATA());
 	}
 
 	public static SwiftCodeEntity maptoEntity(SwiftCodeDTO scd) {
 		return new SwiftCodeEntity(scd.getID(), scd.getBANK_TYPE(), scd.getSWIFT_CODE(), scd.getCONNECTED_TO_SWIFT(),
-				scd.getSWIFT_CONNECTION(), scd.getBANK_NAME(), scd.getBRANCH(), scd.getADDRESS_1(),
-				scd.getADDRESS_2(), scd.getADDRESS_3(), scd.getADDRESS_4(), scd.getCITY(), scd.getCOUNTRY_CODE(),
-				scd.getPARA_STATUS(), scd.getACTIVE_STATUS(), scd.getJSON_DATA());
+				scd.getSWIFT_CONNECTION(), scd.getBANK_NAME(), scd.getBRANCH(), scd.getADDRESS_1(), scd.getADDRESS_2(),
+				scd.getADDRESS_3(), scd.getADDRESS_4(), scd.getCITY(), scd.getCOUNTRY_CODE(), scd.getPARA_STATUS(),
+				scd.getACTIVE_STATUS(), scd.getJSON_DATA());
+	}
+
+	@Override
+	public ByteArrayInputStream exportToExcel(List<SwiftCodeEntity> swiftCodes) throws IOException {
+		// Tạo workbook và sheet
+		Workbook workbook = new XSSFWorkbook();
+		Sheet sheet = workbook.createSheet("SwiftCodes");
+
+		// Tạo hàng tiêu đề
+		Row headerRow = sheet.createRow(0);
+		String[] columns = { "ID", "Bank Type", "Swift Code", "Connected to Swift", "Swift Connection", "Bank Name",
+				"Branch", "Address 1", "Address 2", "Address 3", "Address 4", "City", "Country Code", "Para Status",
+				"Active Status", "JSON Data" };
+
+		// Ghi tiêu đề vào sheet
+		for (int i = 0; i < columns.length; i++) {
+			headerRow.createCell(i).setCellValue(columns[i]);
+		}
+
+		// Ghi dữ liệu vào sheet
+		int rowNum = 1;
+		for (SwiftCodeEntity sce : swiftCodes) {
+			Row row = sheet.createRow(rowNum++);
+			row.createCell(0).setCellValue(sce.getID());
+			row.createCell(1).setCellValue(sce.getBANK_TYPE() != null ? sce.getBANK_TYPE() : "");
+			row.createCell(2).setCellValue(sce.getSWIFT_CODE() != null ? sce.getSWIFT_CODE() : "");
+			row.createCell(3).setCellValue(sce.getCONNECTED_TO_SWIFT() != null ? sce.getCONNECTED_TO_SWIFT() : "");
+			row.createCell(4).setCellValue(sce.getSWIFT_CONNECTION() != null ? sce.getSWIFT_CONNECTION() : "");
+			row.createCell(5).setCellValue(sce.getBANK_NAME() != null ? sce.getBANK_NAME() : "");
+			row.createCell(6).setCellValue(sce.getBRANCH() != null ? sce.getBRANCH() : "");
+			row.createCell(7).setCellValue(sce.getADDRESS_1() != null ? sce.getADDRESS_1() : "");
+			row.createCell(8).setCellValue(sce.getADDRESS_2() != null ? sce.getADDRESS_2() : "");
+			row.createCell(9).setCellValue(sce.getADDRESS_3() != null ? sce.getADDRESS_3() : "");
+			row.createCell(10).setCellValue(sce.getADDRESS_4() != null ? sce.getADDRESS_4() : "");
+			row.createCell(11).setCellValue(sce.getCITY() != null ? sce.getCITY() : "");
+			row.createCell(12).setCellValue(sce.getCOUNTRY_CODE() != null ? sce.getCOUNTRY_CODE() : "");
+			row.createCell(13)
+					.setCellValue(sce.getPARA_STATUS() != 0 ? sce.getPARA_STATUS() == 0 ? "Inactive" : "Active" : "");
+			row.createCell(14).setCellValue(
+					sce.getACTIVE_STATUS() != 0 ? sce.getACTIVE_STATUS() == 0 ? "Inactive" : "Active" : "");
+			row.createCell(15).setCellValue(sce.getJSON_DATA() != null ? sce.getJSON_DATA() : "");
+		}
+
+		// Tự động điều chỉnh kích thước cột
+		for (int i = 0; i < columns.length; i++) {
+			sheet.autoSizeColumn(i);
+		}
+
+		// Ghi workbook vào output stream
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		workbook.write(out);
+		workbook.close();
+
+		return new ByteArrayInputStream(out.toByteArray());
+	}
+
+	@Transactional
+	public Map<String, Object> importFromExcel(InputStream inp) throws IOException {
+	    Map<String, Object> response = new HashMap<>();
+	    List<ExcelError> errors = new ArrayList<>();
+	    List<SwiftCodeEntity> validSwiftCodes = new ArrayList<>();
+	    
+	    try (Workbook workbook = new XSSFWorkbook(inp)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        Iterator<Row> rowIterator = sheet.iterator();
+
+	        // Bỏ qua hàng tiêu đề
+	        if (rowIterator.hasNext()) {
+	            rowIterator.next();
+	        }
+
+	        // Duyệt qua các hàng
+	        int rowNum = 1; // Bắt đầu từ hàng thứ 2 (sau tiêu đề)
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            rowNum++;
+
+	            SwiftCodeDTO scd = new SwiftCodeDTO();
+	            boolean hasError = false;
+
+	            // Bỏ qua cột ID (cột 0), để JPA tự sinh ID
+	            scd.setBANK_TYPE(getCellStringValue(row.getCell(0)));
+	            if (scd.getBANK_TYPE() == null || scd.getBANK_TYPE().isEmpty()) {
+	                errors.add(new ExcelError(rowNum, 0, "Loại ngân hàng không được để trống"));
+	                hasError = true;
+	            }
+
+	            scd.setSWIFT_CODE(getCellStringValue(row.getCell(1)));
+	            if (scd.getSWIFT_CODE() == null || scd.getSWIFT_CODE().isEmpty()) {
+	                errors.add(new ExcelError(rowNum, 1, "Mã SWIFT không được để trống"));
+	                hasError = true;
+	            } else if (scd.getSWIFT_CODE().length() < 8 || scd.getSWIFT_CODE().length() > 11) {
+	                errors.add(new ExcelError(rowNum, 1, "Mã SWIFT phải có độ dài từ 8 đến 11 ký tự"));
+	                hasError = true;
+	            }
+
+	            scd.setCONNECTED_TO_SWIFT(getCellStringValue(row.getCell(2)));
+	            scd.setSWIFT_CONNECTION(getCellStringValue(row.getCell(3)));
+	            scd.setBANK_NAME(getCellStringValue(row.getCell(4)));
+	            if (scd.getBANK_NAME() == null || scd.getBANK_NAME().isEmpty()) {
+	                errors.add(new ExcelError(rowNum, 4, "Tên ngân hàng không được để trống"));
+	                hasError = true;
+	            }
+
+	            scd.setBRANCH(getCellStringValue(row.getCell(5)));
+	            scd.setADDRESS_1(getCellStringValue(row.getCell(6)));
+	            scd.setADDRESS_2(getCellStringValue(row.getCell(7)));
+	            scd.setADDRESS_3(getCellStringValue(row.getCell(8)));
+	            scd.setADDRESS_4(getCellStringValue(row.getCell(9)));
+	            scd.setCITY(getCellStringValue(row.getCell(10)));
+	            scd.setCOUNTRY_CODE(getCellStringValue(row.getCell(11)));
+	            if (scd.getCOUNTRY_CODE() == null || scd.getCOUNTRY_CODE().isEmpty()) {
+	                errors.add(new ExcelError(rowNum, 11, "Mã quốc gia không được để trống"));
+	                hasError = true;
+	            } else if (scd.getCOUNTRY_CODE().length() != 2) {
+	                errors.add(new ExcelError(rowNum, 11, "Mã quốc gia phải có độ dài 2 ký tự"));
+	                hasError = true;
+	            }
+
+	            String paraStatus = getCellStringValue(row.getCell(12));
+	            scd.setPARA_STATUS("Active".equalsIgnoreCase(paraStatus) ? 1 : 0);
+
+	            String activeStatus = getCellStringValue(row.getCell(13));
+	            scd.setACTIVE_STATUS("Active".equalsIgnoreCase(activeStatus) ? 1 : 0);
+
+	            scd.setJSON_DATA(getCellStringValue(row.getCell(14)));
+
+	            // Kiểm tra xem SWIFT_CODE đã tồn tại chưa
+	            if (!hasError) {
+	                Optional<SwiftCodeEntity> existing = repository.findBySWIFTCODE(scd.getSWIFT_CODE());
+	                if (existing.isPresent()) {
+	                    errors.add(new ExcelError(rowNum, 1, "Mã SWIFT đã tồn tại: " + scd.getSWIFT_CODE()));
+	                    hasError = true;
+	                }
+	            }
+
+	            // Nếu không có lỗi, thêm vào danh sách hợp lệ
+	            if (!hasError) {
+	                validSwiftCodes.add(maptoEntity(scd));
+	            }
+	        }
+
+	        // Lưu các bản ghi hợp lệ vào cơ sở dữ liệu
+	        if (!validSwiftCodes.isEmpty()) {
+	            repository.saveAll(validSwiftCodes);
+	        }
+
+	        // Chuẩn bị phản hồi
+	        response.put("success", errors.isEmpty());
+	        response.put("errors", errors);
+
+	    } catch (Exception e) {
+	        response.put("success", false);
+	        response.put("errors", List.of(new ExcelError(0, 0, "Lỗi xử lý file Excel: " + e.getMessage())));
+	    }
+
+	    return response;
+	}
+
+	// Hàm hỗ trợ lấy giá trị chuỗi từ ô
+	private String getCellStringValue(Cell cell) {
+	    if (cell == null) {
+	        return null;
+	    }
+	    switch (cell.getCellType()) {
+	        case STRING:
+	            return cell.getStringCellValue().trim();
+	        case NUMERIC:
+	            return String.valueOf((int) cell.getNumericCellValue());
+	        default:
+	            return null;
+	    }
 	}
 
 }

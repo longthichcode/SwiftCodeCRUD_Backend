@@ -1,8 +1,12 @@
 package com.project.Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -148,5 +152,17 @@ public class SwiftCodeServiceEntityManager implements SwiftCodeService {
 				scd.getSWIFT_CONNECTION(), scd.getBANK_NAME(), scd.getBRANCH(), scd.getADDRESS_1(), scd.getADDRESS_2(),
 				scd.getADDRESS_3(), scd.getADDRESS_4(), scd.getCITY(), scd.getCOUNTRY_CODE(), scd.getPARA_STATUS(),
 				scd.getACTIVE_STATUS(), scd.getJSON_DATA());
+	}
+
+	@Override
+	public ByteArrayInputStream exportToExcel(List<SwiftCodeEntity> swiftCodes) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> importFromExcel(InputStream inp) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

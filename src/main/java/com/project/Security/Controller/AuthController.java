@@ -69,6 +69,8 @@ public class AuthController {
 				.flatMap(role -> role.getFunctions().stream())
 				.map(function -> function.getName()).distinct()
 				.collect(Collectors.toList());
+            
+            
             return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, roles, functions, permissions, userDetails.getUsername()));
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Invalid credentials");

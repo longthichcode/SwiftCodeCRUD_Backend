@@ -32,7 +32,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     void editStatus(@Param("userId") Integer userId, @Param("status") int yn);
     
     // Lấy tất cả người dùng
-    @Query(value = "SELECT * FROM SC_USERS", nativeQuery = true)
+    @Query(value = "SELECT ID,ENABLED,PASSWORD,USER_NAME FROM SC_USERS", nativeQuery = true)
     List<UserEntity> findAllUsers();
     
     //tìm vai trò của người dùnng

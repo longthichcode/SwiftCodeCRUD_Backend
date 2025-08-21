@@ -245,7 +245,12 @@ public class UserController {
 	    }
 	}
 
-	// sửa quyền của vai trò
+	/**
+	 * Sửa quyền của vai trò
+	 * @param roleId ID của vai trò cần sửa quyền
+	 * @param permissionNames Danh sách tên quyền cần cập nhật
+	 * @return ResponseEntity với thông báo thành công hoặc lỗi
+	 */
 	@PutMapping("/roles/{roleId}/permissions")
 	public ResponseEntity<?> editPermissionsByRoleId(@PathVariable Integer roleId,
 			@RequestBody List<String> permissionNames) {

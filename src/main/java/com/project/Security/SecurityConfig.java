@@ -50,7 +50,7 @@ public class SecurityConfig {
                 // các endpoint liên quan đến người dùng
                 .requestMatchers(HttpMethod.GET, "/api/users").hasAuthority("VIEW_USERS")
                 .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAuthority("VIEW_USER_DETAIL")
-                .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasAuthority("UPDATE_USER")
+                .requestMatchers(HttpMethod.PUT, "/api/users/{id}/update").hasAuthority("UPDATE_USER")
                 .requestMatchers(HttpMethod.PUT, "/api/users/{id}/update-roles").hasAuthority("UPDATE_USER_ROLE")
                 .requestMatchers(HttpMethod.PUT, "/api/users/{id}/update-status").hasAuthority("UPDATE_USER_STATUS")
                 .requestMatchers(HttpMethod.POST, "/api/users/create").hasAuthority("CREATE_USER")
@@ -59,6 +59,7 @@ public class SecurityConfig {
                 // các endpoint liên quan đến vai trò và chức năng
                 .requestMatchers(HttpMethod.GET, "/api/users/roles").hasAuthority("VIEW_ROLES")
                 .requestMatchers(HttpMethod.PUT, "/api/users/roles/{id}/functions").hasAuthority("UPDATE_ROLE_FUNCTION")
+                .requestMatchers(HttpMethod.PUT, "/api/users/roles/{id}/permissions").hasAuthority("UPDATE_ROLE_PERMISSION")	
                 .requestMatchers(HttpMethod.GET, "/api/users/roles/functions").hasAuthority("VIEW_FUNCTION")
                 .requestMatchers(HttpMethod.PUT, "/api/users/roles/functions").hasAuthority("UPDATE_FUNCTION")
                 

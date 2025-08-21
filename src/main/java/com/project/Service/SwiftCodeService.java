@@ -1,6 +1,10 @@
 package com.project.Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,4 +27,6 @@ public interface SwiftCodeService {
 	SwiftCodeDTO update(int id ,SwiftCodeDTO scd);
 	void delete(SwiftCodeEntity sce);
 	Page<SwiftCodeDTO> paging(SwiftCodeEntity sf,Pageable page);
+	ByteArrayInputStream exportToExcel(List<SwiftCodeEntity> swiftCodes) throws IOException;
+	Map<String, Object> importFromExcel(InputStream inp) throws IOException;
 }

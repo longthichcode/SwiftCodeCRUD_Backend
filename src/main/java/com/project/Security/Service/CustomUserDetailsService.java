@@ -25,15 +25,22 @@ public class CustomUserDetailsService implements UserDetailsService {
             .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy thông tin người dùng: " + username));
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
         // Thêm roles và permissions từ functions
+//        user.getROLES().forEach(role -> {
+//            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getROLE_NAME()));
+//            // Thêm permissions từ functions
+//            role.getFunctions().forEach(function ->
+//                function.getPermissions().forEach(permission ->
+//                    authorities.add(new SimpleGrantedAuthority(permission.getName()))
+//                )
+//            );
+//        });
+        //thêm roles và permissions được lấy ra từ roles
         user.getROLES().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getROLE_NAME()));
-            // Thêm permissions từ functions
-            role.getFunctions().forEach(function ->
-                function.getPermissions().forEach(permission ->
-                    authorities.add(new SimpleGrantedAuthority(permission.getName()))
-                )
-            );
-        });
+			authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getROLE_NAME()));
+			role.getPermissions().forEach(permission ->
+				authorities.add(new SimpleGrantedAuthority(permission.getName()))
+			);
+		});
 
         return new User(
             user.getUSER_NAME(),
