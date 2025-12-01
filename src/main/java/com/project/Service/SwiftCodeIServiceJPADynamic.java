@@ -10,11 +10,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.project.DTO.ExcelError;
@@ -287,123 +289,292 @@ public class SwiftCodeIServiceJPADynamic implements SwiftCodeService {
 
 		return new ByteArrayInputStream(out.toByteArray());
 	}
+//
+//	@Transactional
+//	public Map<String, Object> importFromExcel(InputStream inp) throws IOException {
+//		Map<String, Object> response = new HashMap<>();
+//		List<ExcelError> errors = new ArrayList<>();
+//		List<SwiftCodeEntity> validSwiftCodes = new ArrayList<>();
+//		int skippedCount = 0;
+//		int insertedCount = 0;
+//
+//		try (Workbook workbook = new XSSFWorkbook(inp)) {
+//			Sheet sheet = workbook.getSheetAt(0);
+//			Iterator<Row> rowIterator = sheet.iterator();
+//
+//			// Bỏ qua hàng tiêu đề
+//			if (rowIterator.hasNext()) {
+//				rowIterator.next();
+//			}
+//
+//			// Duyệt qua các hàng
+//			int rowNum = 1; // Bắt đầu từ hàng thứ 2 (sau tiêu đề)
+//			while (rowIterator.hasNext()) {
+//				Row row = rowIterator.next();
+//				rowNum++;
+//
+//				SwiftCodeDTO scd = new SwiftCodeDTO();
+//				boolean hasError = false;
+//
+//				scd.setBANK_TYPE(getCellStringValue(row.getCell(0)));
+//				if (scd.getBANK_TYPE() == null || scd.getBANK_TYPE().isEmpty()) {
+//					errors.add(new ExcelError(rowNum, 0, "Loại ngân hàng không được để trống"));
+//					skippedCount++;
+//					hasError = true;
+//				}
+//
+//				scd.setSWIFT_CODE(getCellStringValue(row.getCell(1)));
+//				if (scd.getSWIFT_CODE() == null || scd.getSWIFT_CODE().isEmpty()) {
+//					errors.add(new ExcelError(rowNum, 1, "Mã SWIFT không được để trống"));
+//					skippedCount++;
+//					hasError = true;
+//				} else if (scd.getSWIFT_CODE().length() < 8 || scd.getSWIFT_CODE().length() > 11) {
+//					errors.add(new ExcelError(rowNum, 1, "Mã SWIFT phải có độ dài từ 8 đến 11 ký tự"));
+//					skippedCount++;
+//					hasError = true;
+//				}
+//
+//				scd.setCONNECTED_TO_SWIFT(getCellStringValue(row.getCell(2)));
+//				scd.setSWIFT_CONNECTION(getCellStringValue(row.getCell(3)));
+//				scd.setBANK_NAME(getCellStringValue(row.getCell(4)));
+//				if (scd.getBANK_NAME() == null || scd.getBANK_NAME().isEmpty()) {
+//					errors.add(new ExcelError(rowNum, 4, "Tên ngân hàng không được để trống"));
+//					skippedCount++;
+//					hasError = true;
+//				}
+//
+//				scd.setBRANCH(getCellStringValue(row.getCell(5)));
+//				scd.setADDRESS_1(getCellStringValue(row.getCell(6)));
+//				scd.setADDRESS_2(getCellStringValue(row.getCell(7)));
+//				scd.setADDRESS_3(getCellStringValue(row.getCell(8)));
+//				scd.setADDRESS_4(getCellStringValue(row.getCell(9)));
+//				scd.setCITY(getCellStringValue(row.getCell(10)));
+//				scd.setCOUNTRY_CODE(getCellStringValue(row.getCell(11)));
+//				if (scd.getCOUNTRY_CODE() == null || scd.getCOUNTRY_CODE().isEmpty()
+//						|| scd.getCOUNTRY_CODE().length() != 2) {
+//					errors.add(new ExcelError(rowNum, 11, "Mã quốc gia không được để trống và phải có độ dài 2 ký tự"));
+//					skippedCount++;
+//					hasError = true;
+//				}
+//
+//				String paraStatus = getCellStringValue(row.getCell(12));
+//				scd.setPARA_STATUS("Active".equalsIgnoreCase(paraStatus) ? 1 : 0);
+//
+//				String activeStatus = getCellStringValue(row.getCell(13));
+//				scd.setACTIVE_STATUS("Active".equalsIgnoreCase(activeStatus) ? 1 : 0);
+//
+//				scd.setJSON_DATA(getCellStringValue(row.getCell(14)));
+//
+//				// Kiểm tra xem SWIFT_CODE đã tồn tại chưa
+//				if (!hasError) {
+//					Optional<SwiftCodeEntity> existing = repository.findBySWIFTCODE(scd.getSWIFT_CODE());
+//					if (existing.isPresent()) {
+//						errors.add(new ExcelError(rowNum, 1, "Mã SWIFT đã tồn tại: " + scd.getSWIFT_CODE()));
+//						skippedCount++;
+//						hasError = true;
+//					}
+//				}
+//
+//				// Nếu không có lỗi, thêm vào danh sách hợp lệ
+//				if (!hasError) {
+//					validSwiftCodes.add(maptoEntity(scd));
+//					insertedCount++;
+//				}
+//			}
+//
+//			// Lưu các bản ghi hợp lệ vào cơ sở dữ liệu
+//			if (!validSwiftCodes.isEmpty()) {
+//				repository.saveAll(validSwiftCodes);
+//			}
+//
+//			// Chuẩn bị phản hồi
+//			response.put("success", errors.isEmpty());
+//			response.put("errors", errors);
+//			response.put("insertedCount", insertedCount);
+//			response.put("skippedCount", skippedCount);
+//
+//		} catch (Exception e) {
+//			response.put("success", false);
+//			response.put("errors", List.of(new ExcelError(0, 0, "Lỗi xử lý file Excel: " + e.getMessage())));
+//		}
+//
+//		return response;
+//	}
+//	
+//	
+//
+	// Hàm hỗ trợ lấy giá trị chuỗi từ ô
+	private String getCellStringValue(Cell cell) {
+		if (cell == null) {
+			return null;
+		}
+		switch (cell.getCellType()) {
+		case STRING:
+			return cell.getStringCellValue().trim();
+		case NUMERIC:
+			return String.valueOf((int) cell.getNumericCellValue());
+		default:
+			return null;
+		}
+	}
 
 	@Transactional
 	public Map<String, Object> importFromExcel(InputStream inp) throws IOException {
 	    Map<String, Object> response = new HashMap<>();
-	    List<ExcelError> errors = new ArrayList<>();
 	    List<SwiftCodeEntity> validSwiftCodes = new ArrayList<>();
-	    
+	    List<List<String>> errorRows = new ArrayList<>();
+
+	    int skippedCount = 0;
+	    int insertedCount = 0;
+
 	    try (Workbook workbook = new XSSFWorkbook(inp)) {
 	        Sheet sheet = workbook.getSheetAt(0);
 	        Iterator<Row> rowIterator = sheet.iterator();
 
-	        // Bỏ qua hàng tiêu đề
+	        // Lấy header
+	        List<String> headers = new ArrayList<>();
 	        if (rowIterator.hasNext()) {
-	            rowIterator.next();
+	            Row headerRow = rowIterator.next();
+	            for (Cell cell : headerRow) {
+	                headers.add(getCellStringValue(cell));
+	            }
+	            headers.add("Error"); // thêm cột lỗi
 	        }
 
-	        // Duyệt qua các hàng
-	        int rowNum = 1; // Bắt đầu từ hàng thứ 2 (sau tiêu đề)
+	        int rowNum = 1;
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
 	            rowNum++;
 
 	            SwiftCodeDTO scd = new SwiftCodeDTO();
 	            boolean hasError = false;
+	            StringBuilder errorMessage = new StringBuilder();
 
-	            // Bỏ qua cột ID (cột 0), để JPA tự sinh ID
 	            scd.setBANK_TYPE(getCellStringValue(row.getCell(0)));
 	            if (scd.getBANK_TYPE() == null || scd.getBANK_TYPE().isEmpty()) {
-	                errors.add(new ExcelError(rowNum, 0, "Loại ngân hàng không được để trống"));
+	                errorMessage.append("Loại ngân hàng không được để trống; ");
 	                hasError = true;
 	            }
 
 	            scd.setSWIFT_CODE(getCellStringValue(row.getCell(1)));
 	            if (scd.getSWIFT_CODE() == null || scd.getSWIFT_CODE().isEmpty()) {
-	                errors.add(new ExcelError(rowNum, 1, "Mã SWIFT không được để trống"));
+	                errorMessage.append("Mã SWIFT không được để trống; ");
 	                hasError = true;
 	            } else if (scd.getSWIFT_CODE().length() < 8 || scd.getSWIFT_CODE().length() > 11) {
-	                errors.add(new ExcelError(rowNum, 1, "Mã SWIFT phải có độ dài từ 8 đến 11 ký tự"));
+	                errorMessage.append("Mã SWIFT phải có độ dài 8-11 ký tự; ");
 	                hasError = true;
 	            }
 
-	            scd.setCONNECTED_TO_SWIFT(getCellStringValue(row.getCell(2)));
-	            scd.setSWIFT_CONNECTION(getCellStringValue(row.getCell(3)));
 	            scd.setBANK_NAME(getCellStringValue(row.getCell(4)));
 	            if (scd.getBANK_NAME() == null || scd.getBANK_NAME().isEmpty()) {
-	                errors.add(new ExcelError(rowNum, 4, "Tên ngân hàng không được để trống"));
+	                errorMessage.append("Tên ngân hàng không được để trống; ");
 	                hasError = true;
 	            }
 
+	            scd.setCOUNTRY_CODE(getCellStringValue(row.getCell(11)));
+	            if (scd.getCOUNTRY_CODE() == null || scd.getCOUNTRY_CODE().isEmpty()
+	                    || scd.getCOUNTRY_CODE().length() != 2) {
+	                errorMessage.append("Mã quốc gia phải có 2 ký tự; ");
+	                hasError = true;
+	            }
+	            
+	            scd.setCONNECTED_TO_SWIFT(getCellStringValue(row.getCell(2)));
+	            scd.setSWIFT_CONNECTION(getCellStringValue(row.getCell(3)));
 	            scd.setBRANCH(getCellStringValue(row.getCell(5)));
 	            scd.setADDRESS_1(getCellStringValue(row.getCell(6)));
 	            scd.setADDRESS_2(getCellStringValue(row.getCell(7)));
 	            scd.setADDRESS_3(getCellStringValue(row.getCell(8)));
 	            scd.setADDRESS_4(getCellStringValue(row.getCell(9)));
 	            scd.setCITY(getCellStringValue(row.getCell(10)));
-	            scd.setCOUNTRY_CODE(getCellStringValue(row.getCell(11)));
-	            if (scd.getCOUNTRY_CODE() == null || scd.getCOUNTRY_CODE().isEmpty()) {
-	                errors.add(new ExcelError(rowNum, 11, "Mã quốc gia không được để trống"));
-	                hasError = true;
-	            } else if (scd.getCOUNTRY_CODE().length() != 2) {
-	                errors.add(new ExcelError(rowNum, 11, "Mã quốc gia phải có độ dài 2 ký tự"));
-	                hasError = true;
-	            }
-
 	            String paraStatus = getCellStringValue(row.getCell(12));
 	            scd.setPARA_STATUS("Active".equalsIgnoreCase(paraStatus) ? 1 : 0);
-
 	            String activeStatus = getCellStringValue(row.getCell(13));
 	            scd.setACTIVE_STATUS("Active".equalsIgnoreCase(activeStatus) ? 1 : 0);
-
 	            scd.setJSON_DATA(getCellStringValue(row.getCell(14)));
 
-	            // Kiểm tra xem SWIFT_CODE đã tồn tại chưa
+	            // check trùng
 	            if (!hasError) {
 	                Optional<SwiftCodeEntity> existing = repository.findBySWIFTCODE(scd.getSWIFT_CODE());
 	                if (existing.isPresent()) {
-	                    errors.add(new ExcelError(rowNum, 1, "Mã SWIFT đã tồn tại: " + scd.getSWIFT_CODE()));
+	                    errorMessage.append("Mã SWIFT đã tồn tại: ").append(scd.getSWIFT_CODE()).append("; ");
 	                    hasError = true;
 	                }
 	            }
 
-	            // Nếu không có lỗi, thêm vào danh sách hợp lệ
-	            if (!hasError) {
+	            // Nếu có lỗi → ghi lại cả dòng
+	            if (hasError) {
+	                List<String> rowData = new ArrayList<>();
+	                for (int i = 0; i <= 14; i++) {
+	                    rowData.add(getCellStringValue(row.getCell(i)));
+	                }
+	                rowData.add(errorMessage.toString());
+	                errorRows.add(rowData);
+	                skippedCount++;
+	            } else {
 	                validSwiftCodes.add(maptoEntity(scd));
+	                insertedCount++;
 	            }
 	        }
 
-	        // Lưu các bản ghi hợp lệ vào cơ sở dữ liệu
+	        // Lưu DB
 	        if (!validSwiftCodes.isEmpty()) {
 	            repository.saveAll(validSwiftCodes);
 	        }
 
-	        // Chuẩn bị phản hồi
-	        response.put("success", errors.isEmpty());
-	        response.put("errors", errors);
+	        // Nếu có lỗi → tạo file Excel lỗi (dạng byte[])
+	        byte[] errorFile = null;
+	        if (!errorRows.isEmpty()) {
+	            Workbook errorWb = new XSSFWorkbook();
+	            Sheet errorSheet = errorWb.createSheet("Errors");
+
+	            // ghi header
+	            Row headerRow = errorSheet.createRow(0);
+	            for (int i = 0; i < headers.size(); i++) {
+	                headerRow.createCell(i).setCellValue(headers.get(i));
+	            }
+
+	            // ghi data
+	            int r = 1;
+	            for (List<String> rowData : errorRows) {
+	                Row errRow = errorSheet.createRow(r++);
+	                for (int i = 0; i < rowData.size(); i++) {
+	                    errRow.createCell(i).setCellValue(rowData.get(i));
+	                }
+	            }
+
+	            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	            errorWb.write(bos);
+	            errorWb.close();
+	            errorFile = bos.toByteArray();
+	        }
+
+	        response.put("success", errorRows.isEmpty());
+	        response.put("insertedCount", insertedCount);
+	        response.put("skippedCount", skippedCount);
+	        response.put("errorFile", errorFile);
 
 	    } catch (Exception e) {
 	        response.put("success", false);
-	        response.put("errors", List.of(new ExcelError(0, 0, "Lỗi xử lý file Excel: " + e.getMessage())));
+	        response.put("errorMessage", "Lỗi xử lý file Excel: " + e.getMessage());
 	    }
 
 	    return response;
 	}
 
-	// Hàm hỗ trợ lấy giá trị chuỗi từ ô
-	private String getCellStringValue(Cell cell) {
-	    if (cell == null) {
-	        return null;
-	    }
-	    switch (cell.getCellType()) {
-	        case STRING:
-	            return cell.getStringCellValue().trim();
-	        case NUMERIC:
-	            return String.valueOf((int) cell.getNumericCellValue());
-	        default:
-	            return null;
-	    }
+	//cập nhật trạng thái para_status
+	public void updateParaStatus(int id, int para_status) {
+		try {
+			repository.updateParaStatus(id, para_status);
+		} catch (Exception e) {
+			throw new RuntimeException("Lỗi cập nhật trạng thái para_status: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public ByteArrayInputStream exportToErrorExcel(List<SwiftCodeEntity> swiftCodes, List<ExcelError> errors)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

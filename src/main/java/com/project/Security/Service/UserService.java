@@ -187,6 +187,20 @@ public class UserService {
 				user.getPASSWORD(), user.getENABLED() ? 1 : 0)).collect(Collectors.toList());
 	}
 	
+	// xoá người dùng theo ID 
+	
+	@Transactional
+	public boolean deleteUserById(int userId) {
+		if (!userRepository.existsById(userId)) {
+			return false;
+		}else {
+			userRepository.deleteUserRoleByUserId(userId);
+			userRepository.deleteUserById(userId);
+			return true;
+		}
+		
+	}
+	
 	// Tìm người dùng theo vai trò
 	public List<String> findUsersByRoleId(Integer roleId) {
 		return roleRepository.findUsersByRoleId(roleId);

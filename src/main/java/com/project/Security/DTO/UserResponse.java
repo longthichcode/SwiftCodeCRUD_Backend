@@ -10,7 +10,7 @@ public class UserResponse {
     private String password;
     private Integer enabled;
     private List<String> roles;
-    // Constructors
+
     public UserResponse() {}
     public UserResponse(Integer id, String username, String password, Integer enabled, List<String> roles) {
 		this.id = id;

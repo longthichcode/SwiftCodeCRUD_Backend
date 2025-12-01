@@ -56,7 +56,6 @@ public class AuthController {
                     .map(authentication -> authentication.getAuthority())
                     .collect(Collectors.toList())
             );
-            String refreshToken = jwtUtil.generateRefreshToken(userDetails.getUsername());
             List<String> roles = userDetails.getAuthorities().stream()
                 .map(authentication -> authentication.getAuthority())
                 .filter(authority -> authority.startsWith("ROLE_"))
@@ -71,30 +70,9 @@ public class AuthController {
 				.collect(Collectors.toList());
             
             
-            return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken, roles, functions, permissions, userDetails.getUsername()));
+            return ResponseEntity.ok(new AuthResponse(accessToken, roles, functions, permissions, userDetails.getUsername()));
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
-//
-//    @PostMapping("/refresh")
-//    public ResponseEntity<?> refresh(@RequestBody RefreshRequest request) {
-//        String refreshToken = request.getRefreshToken();
-//        try {
-//            String username = jwtUtil.extractUsername(refreshToken);
-//            if (jwtUtil.validateToken(refreshToken, username)) {
-//                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-//                String newAccessToken = jwtUtil.generateAccessToken(
-//                    userDetails.getUsername(),
-//                    userDetails.getAuthorities().stream()
-//                        .map(authentication -> authentication.getAuthority())
-//                        .collect(Collectors.toList())
-//                );
-//                return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken, null, userDetails.getUsername()));
-//            }
-//            return ResponseEntity.status(401).body("Invalid refresh token");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(401).body("Invalid refresh token");
-//        }
-//    }
 }

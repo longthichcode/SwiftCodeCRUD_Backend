@@ -32,7 +32,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     void editStatus(@Param("userId") Integer userId, @Param("status") int yn);
     
     // Lấy tất cả người dùng
-    @Query(value = "SELECT ID,ENABLED,PASSWORD,USER_NAME FROM SC_USERS", nativeQuery = true)
+    @Query(value = "SELECT * FROM SC_USERS", nativeQuery = true)
     List<UserEntity> findAllUsers();
     
     //tìm vai trò của người dùnng
@@ -40,4 +40,14 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 				   "JOIN SC_ROLES r ON ur.ROLE_ID = r.ID " +
 				   "WHERE ur.USER_ID = :userId", nativeQuery = true)
     List<String> findRolesByUserId(@Param("userId") Integer userId);
+    
+    // xoá thông tin về người dùng 
+    @Modifying
+    @Query(value = "DELETE FROM SC_USER_ROLE WHERE USER_ID = :userId", nativeQuery = true)
+    void deleteUserRoleByUserId(@Param("userId") Integer userId);
+
+    @Modifying
+    @Query(value = "DELETE FROM SC_USERS WHERE ID = :userId", nativeQuery = true)
+    void deleteUserById(@Param("userId") Integer userId);
+    
 }

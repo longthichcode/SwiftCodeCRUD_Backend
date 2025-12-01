@@ -46,6 +46,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/jpadynamic/swiftcode/{id}").hasAuthority("UPDATE_SWIFTCODE")
                 .requestMatchers(HttpMethod.DELETE, "/api/jpadynamic/swiftcode/{id}").hasAuthority("DELETE_SWIFTCODE")
                 .requestMatchers(HttpMethod.GET, "/api/jpadynamic/swiftcode/{id}").hasAuthority("VIEW_SWIFTCODE_DETAIL")
+                .requestMatchers(HttpMethod.POST, "/api/jpadynamic/swiftcode/export").hasAuthority("EXPORT_EXCEL")
+                .requestMatchers(HttpMethod.POST, "/api/jpadynamic/swiftcode/export").hasAuthority("IMPORT_EXCEL")
                 
                 // các endpoint liên quan đến người dùng
                 .requestMatchers(HttpMethod.GET, "/api/users").hasAuthority("VIEW_USERS")
@@ -54,7 +56,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/users/{id}/update-roles").hasAuthority("UPDATE_USER_ROLE")
                 .requestMatchers(HttpMethod.PUT, "/api/users/{id}/update-status").hasAuthority("UPDATE_USER_STATUS")
                 .requestMatchers(HttpMethod.POST, "/api/users/create").hasAuthority("CREATE_USER")
-                .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAuthority("DELETE_USER")
+                .requestMatchers(HttpMethod.DELETE, "/api/users/{userId}").hasAuthority("DELETE_USER")
                 
                 // các endpoint liên quan đến vai trò và chức năng
                 .requestMatchers(HttpMethod.GET, "/api/users/roles").hasAuthority("VIEW_ROLES")

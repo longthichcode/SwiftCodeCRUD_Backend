@@ -8,7 +8,9 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 
+import com.project.DTO.ExcelError;
 import com.project.DTO.SwiftCodeDTO;
 import com.project.Entity.SwiftCodeEntity;
 /**
@@ -29,4 +31,7 @@ public interface SwiftCodeService {
 	Page<SwiftCodeDTO> paging(SwiftCodeEntity sf,Pageable page);
 	ByteArrayInputStream exportToExcel(List<SwiftCodeEntity> swiftCodes) throws IOException;
 	Map<String, Object> importFromExcel(InputStream inp) throws IOException;
+	ByteArrayInputStream exportToErrorExcel(List<SwiftCodeEntity> swiftCodes, List<ExcelError> errors) throws IOException;
+	void updateParaStatus(int id, int para_status);
+	
 }

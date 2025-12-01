@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.project.DAO.SwiftCodeDAO;
+import com.project.DTO.ExcelError;
 import com.project.DTO.SwiftCodeDTO;
 import com.project.Entity.SwiftCodeEntity;
 
@@ -162,6 +163,13 @@ public class SwiftCodeServiceEntityManager implements SwiftCodeService {
 
 	@Override
 	public Map<String, Object> importFromExcel(InputStream inp) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ByteArrayInputStream exportToErrorExcel(List<SwiftCodeEntity> swiftCodes, List<ExcelError> errors)
+			throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

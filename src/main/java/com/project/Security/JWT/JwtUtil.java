@@ -33,17 +33,6 @@ public class JwtUtil {
             .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
             .compact();
     }
-
-    // Tạo refresh token
-    public String generateRefreshToken(String username) {
-        return Jwts.builder()
-            .setSubject(username)
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-            .compact();
-    }
-
     // Trích xuất username từ token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

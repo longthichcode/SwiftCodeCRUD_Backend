@@ -31,7 +31,7 @@ public class UserEntity {
         inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
     )
     private Set<RoleEntity> ROLES = new HashSet<>();
-
+    
     public UserEntity() {
     }
 
@@ -82,4 +82,13 @@ public class UserEntity {
     public void setROLES(Set<RoleEntity> ROLES) {
         this.ROLES = ROLES;
     }
+
+
+	@Override
+	public String toString() {
+		return "UserEntity [ID=" + ID + ", USER_NAME=" + USER_NAME + ", PASSWORD=" + PASSWORD + ", ENABLED=" + ENABLED
+				+ ", ROLES=" + ROLES + "]";
+	}
+    
+    
 }
